@@ -1,3 +1,4 @@
+
 const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
 
@@ -5,12 +6,24 @@ const { Tag, Product, ProductTag } = require('../../models');
 
 router.get('/', (req, res) => {
   // find all tags
-  // be sure to include its associated Product data
+  Tag.findAll({
+    // be sure to include its associated Product data
+    //--TODO:: Raw Query, here
+    // include: [{model: Product}]
+  })
+  .then(tags => res.status(200).json(tags))
+  .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
 router.get('/:id', (req, res) => {
   // find a single tag by its `id`
-  // be sure to include its associated Product data
+  Tag.findAll({
+    // be sure to include its associated Product data
+    // include: [{model: Product}]
+    //-- TODO:: Raw Query, here 
+  })
+  .then(tags => res.status(200).json(tags))
+  .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
 router.post('/', (req, res) => {

@@ -5,10 +5,12 @@ const { Category, Product } = require('../../models');
 
 router.get('/', (req, res) => {
   // find all categories
-  Category.findAll()
+  Category.findAll({
+    // Include its associated Products
+    include: [{model: Product}]
+  })
     .then(categories => res.status(200).json(categories))
     .catch(err => res.status(500).json(`ERROR: ${err}`))
-  // be sure to include its associated Products
 });
 
 router.get('/:id', (req, res) => {
@@ -17,14 +19,17 @@ router.get('/:id', (req, res) => {
     where: {
       id: req.params.id
     },
-    // be sure to include its associated Products
-    include: [
-      {model: Product,
-      // attributes: ['product_name']
-      }
-    ]
+    // Include its associated Products
+    include: [{model: Product}]
   })
-    .then(categories => res.status(200).json(categories))
+    .then(categories => {
+      if(!categories){
+        res.status(404).json({ message: `No category found with id: ${req.params.id}` });
+      }
+      else {
+        res.status(200).json(categories)
+      }
+    })
     .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
