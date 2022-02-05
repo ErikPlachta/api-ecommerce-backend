@@ -7,6 +7,9 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
+  let results = "test";
+
+  res.status(200).json(results);
 });
 
 // get one product
