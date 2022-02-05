@@ -1,6 +1,8 @@
-
 const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
+
+//-- Used for getting products associated to tags
+const sequelize = require('../../config/connection');
 
 // The `/api/tags` endpoint
 
@@ -8,8 +10,12 @@ router.get('/', (req, res) => {
   // find all tags
   Tag.findAll({
     // be sure to include its associated Product data
-    //--TODO:: Raw Query, here
-    // include: [{model: Product}]
+    include: [
+      {
+        model: Product,
+        as: "tag_id"
+      }
+    ]
   })
   .then(tags => res.status(200).json(tags))
   .catch(err => res.status(500).json(`ERROR: ${err}`))
@@ -17,12 +23,19 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
   // find a single tag by its `id`
-  Tag.findAll({
-    // be sure to include its associated Product data
-    // include: [{model: Product}]
-    //-- TODO:: Raw Query, here 
+  Tag.findOne({
+    where: {
+      id: req.params.id
+    },
+    // Include its associated Product data
+    include: [
+      {
+        model: Product,
+        as: "tag_id"
+      }
+  ]
   })
-  .then(tags => res.status(200).json(tags))
+  .then( tags => res.status(200).json(tags))
   .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
