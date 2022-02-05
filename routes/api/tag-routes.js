@@ -59,7 +59,7 @@ router.post('/', (req, res) => {
       {
       'tag_name': req.body.tag_name,
     })
-      .then(dbTagData => res.status(200).json({message: `Created new tag.`,response: dbTagData}))
+      .then(dbTagData => res.status(200).json({message: `Created new tag.`,responseCode: dbTagData}))
       .catch(err => {
         // console.log(err);
         res.status(500).json(err);
@@ -84,7 +84,7 @@ router.put('/:id', (req, res) => {
       .then(dbTagData => {
         //-- If the ID did not exist, response message
         if (!dbTagData) {
-          res.status(404).json({ message: `No post found with this id ${req.params.id}` });
+          res.status(404).json({ message: `No Tag found with this id ${req.params.id}` });
           return;
         }
         res.status(200).json({message: "Requset received.",responesCode: dbTagData[0]});
@@ -105,10 +105,10 @@ router.delete('/:id', (req, res) => {
   })
     .then(dbTagData => {
       if (!dbTagData) {
-        res.status(404).json({ message: `No post found with this id: ${req.params.id}` });
+        res.status(404).json({ message: `No tag found with this id: ${req.params.id}` });
         return;
       }
-      res.status(200).json({message: `Successly deleted Tag: ${req.params.id}`,response: `${dbTagData}`});
+      res.status(200).json({message: `Successly deleted Tag: ${req.params.id}`,responseCode: `${dbTagData}`});
     })
     .catch(err => {
       console.log(err);
