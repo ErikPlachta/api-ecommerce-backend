@@ -21,18 +21,17 @@
 **Your challenge is to build the back end for an e-commerce site.**
 > You’ll take a working Express.js API and configure it to use Sequelize to interact with a MySQL database.
 
-
 ---
 
-## Goals
-
-- [ ] Write out goals 😁
-
+---
 
 ## Requirements
 
 - MySQL
-- Node
+- Node.js
+- Program to Manage API Calling
+    - I recommend Insomnia or Postmans
+    - ( TODO:: ADD LINKS )
 
 ### Dependencies
 
@@ -45,16 +44,56 @@
 
 ### Dev Dependencies
 
-- [nodemon] is used 
+- [nodemon] is used for...
 
+---
+
+---
 
 ## Usage
 
-1. Download Repo
-2. npm -i
-3. Update .env with your username and password
-1. Use the schema.sql file in the db folder to create your database using MySQL shell commands. Use environment variables to store sensitive data, like your MySQL username, password, and database name.
-2. 
+### 1. Download The App from URL_HERE
+### 2. Initialize the App
+
+```bash
+npm -i
+```
+TODO:: Add giphy
+
+### 3. Update .env with your MySQL Username and Password
+
+```env
+DB_NAME=ecommerce_db
+DB_USER=your-username
+DB_PW=your-password
+```
+TODO:: Add giphy
+
+### 4. Use the `schema.sql` file in the `./db` folder to create your database using MySQL shell Commands
+
+```bash
+mysql -u username -p < db/schema.sql
+Enter Password:
+```
+TODO:: Add giphy
+
+### 5. Seed your Database
+```bash
+npm run seed
+```
+TODO:: Add giphy
+
+### 6. Start your Local Server
+
+```bash
+npm start
+```
+TODO:: Add giphy
+
+### 7. Use API to Manage the Database
+TODO:: Add giphy
+
+---
 
 ---
 
