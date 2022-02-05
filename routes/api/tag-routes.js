@@ -35,7 +35,14 @@ router.get('/:id', (req, res) => {
       }
   ]
   })
-  .then( tags => res.status(200).json(tags))
+  .then( tag => {
+    if(!tag){
+      res.status(404).json({ message: `No tag found with id: ${req.params.id}` });
+    }
+    else {
+      res.status(200).json(tag)
+    }
+  })
   .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
