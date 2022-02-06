@@ -59,7 +59,12 @@ router.post('/', (req, res) => {
       {
       'category_name': req.body.category_name,
     })
-      .then(dbCategoryData => res.status(200).json({message: `Created new category.`,request: dbCategoryData}))
+      .then(dbCategoryData => res.status(200).json({
+        request: dbCategoryData,
+        response: {
+          message: `Created new category.`
+        }
+      }))
       .catch(err => {
         // console.log(err);
         res.status(500).json(err);
@@ -88,10 +93,30 @@ router.put('/:id', (req, res) => {
       .then(dbCategoryData => {
         //-- If the ID did not exist, response message
         if (!dbCategoryData) {
-          res.status(404).json({ message: `No Category found with this id ${req.params.id}` });
+          res.status(404).json({
+            request: {
+              method: req.method,
+              params: req.params,
+              body: req.body
+            },
+            response: {
+              message: `No Category found with this id ${req.params.id}` 
+            }
+          });
+          //-- Exit func
           return;
         }
-        res.status(200).json({message: "Requset received.",responesCode: dbCategoryData[0]});
+        res.status(200).json({
+          request: {
+            method: req.method,
+            params: req.params,
+            body: req.body
+          },
+          response: {
+            message: "Request received.",
+            success: dbCategoryData[0],
+          }
+        });
       })
       .catch(err => {
         console.log(err);
