@@ -87,11 +87,12 @@ router.post('/', (req, res) => {
   if(!req.body.tag_name){
     res.status(404).json({
       request: {
-        method: req.method, 
-        body: req.body
+        method: req.method,
+        params: req.params
       },
       response: {
-        message: `Invalid request.`
+        message: `Invalid request.`,
+        status: 404,
       }
     });
   }
@@ -105,7 +106,7 @@ router.post('/', (req, res) => {
         // message: `Created new tag ${dbTagData.id} id: ${dbTagData.tag_name}.`,
         request: {
           method: req.method, 
-          body: req.body
+          params: req.params
         },
         response: {
           status: 200,
@@ -209,22 +210,27 @@ router.delete('/:id', (req, res) => {
     .then(dbTagData => {
       if (!dbTagData) {
         res.status(404).json({
-          message: `No tag found with this id: ${req.params.id}`,
           request: {
-            method: req.method, 
-            id: req.params.id
+            method: req.method,
+            body: req.body,
+            params: req.params
+          },
+          response: {
+            message: `Invalid request. No tag found with id: ${req.params.id}`,
+            status: 404
           }
         });
         return;
       }
       res.status(200).json({
-        message: `Successly deleted Tag: ${req.params.id}`,
+        message: `Successly deleted tag ${req.params.id}`,
         request: {
           method: req.method,
           id: req.params.id
         },
         response: {
-          responseCode: `${dbTagData}`
+          message: `Successly processed request to delete tag id: ${req.params.id}`,
+          responseCode: dbTagData
         }
       });
     })

@@ -94,6 +94,7 @@ router.post('/', (req, res) => {
       
       //-- Assigning database response to var
       dbProductData = product;
+      console.log(product)
 
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
       if (req.body.tagIds) {
@@ -135,6 +136,9 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   //-- Update an existing product field
   
+  //-- Holding the database response
+  let dbProductData = null;
+
   // update product data
   Product.update(req.body, {
     // product_name: req.body.product_name,
@@ -145,43 +149,62 @@ router.put('/:id', (req, res) => {
         id: req.params.id,
     },
   })
-  
   // find all associated tags from ProductTag
     .then((product) => {
+      dbProductData = product;
+      
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
-
-    //-- Assign Product Tags if relevant
+  //-- Assign Product Tags if relevant
     .then((productTags) => {  
       
       // get list of current tag_ids
       const productTagIds = productTags.map(({ tag_id }) => tag_id);
       
-      // create filtered list of new tag_ids
-      const newProductTags = req.body.tagIds
-        .filter((tag_id) => {!productTagIds.includes(tag_id)})
-        .map((tag_id) => {
-          return {
-            product_id: req.params.id,
-            tag_id,
-          };
-        });
       
-      // figure out which ones to remove
-      const productTagsToRemove = productTags
-        .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
-        .map(({ id }) => id);
+      //-- If body included tagIds, evaluate and update them on item
+      if(req.body.tagIds){
         
-        // run both actions, then return results
-      return Promise.all([
-        
-        ProductTag.destroy({ where: { id: productTagsToRemove } }),
-        ProductTag.bulkCreate(newProductTags),
-      ]);
+      //-- Try to review and update tags
+        try {
+          // create filtered list of new tag_ids
+          const newProductTags = req.body.tagIds
+            .filter((tag_id) => {!productTagIds.includes(tag_id)})
+            .map((tag_id) => {
+              return {
+                product_id: req.params.id,
+                tag_id,
+              };
+            });
+
+          // Which tags to remove - (recived `productTags` as then arg)
+          const productTagsToRemove = productTags
+            .filter(({ tag_id }) =>     !req.body.tagIds.includes(tag_id) )
+            .map(({ id }) => id);
+          
+          // run both actions, then return results
+          return Promise.all([
+            "Reviewed and updated tags if approriate",
+            ProductTag.destroy({ where: { id: productTagsToRemove } }),
+            ProductTag.bulkCreate(newProductTags),
+          ])
+        }
+      
+      //-- if can't update tags, response matches
+        catch (err) {
+          console.log(`//-- Catch Error: ${err}`)
+          return err;
+        }
+      }
+    //-- otherwise no tags so don't try
+      else {
+        // console.log("//-- Else no tags")
+        return "No tagIds to update";
+      }
     })
 
-    //-- Respond to client with success with details
-    .then((updatedProductTags) => res.status(200).json(
+  //-- Respond to client with success with details
+    .then((results) => res.status(200).json(
       {
         request: {
           method: req.method,
@@ -192,21 +215,26 @@ router.put('/:id', (req, res) => {
         response: {
           status: 200,
           message: "Received and procssed request.",
-          success: updatedProductTags[0],
+          success: dbProductData[0],
+          apiResponse: results
         }
       }
     ))
 
-    //-- Respond to client if error with details
+  //-- Respond to client if error with details
     .catch( ( err ) => {
       console.log(err);
       res.status(400).json({
-        message: "404 - Bad Request",
         request: {
           params: req.params, 
           body: req.body
         },
-        error: err
+        response: {
+          message: "Invalid Request.",
+          status: 400,
+          success: dbProductData,
+          error: err,
+        }
       });
     });
 });
@@ -224,12 +252,29 @@ router.delete('/:id', (req, res) => {
   })
     .then(dbProductData => {
       if (!dbProductData) {
-        res.status(404).json({ message: `No tag found with this id: ${req.params.id}` });
+        res.status(404).json({
+          request: {
+            method: req.method,
+            body: req.body,
+            params: req.params
+          },
+          response: {
+            message: `Invalid request. No product found with id: ${req.params.id}`,
+            status: 404
+          }
+        });
         return;
       }
       res.status(200).json({
-        message: `Successly deleted Product: ${req.params.id}`,
-        responseCode: `${dbProductData}`
+        request: {
+          method: req.method,
+          body: req.body,
+          params: req.params
+        },
+        response: {
+          message: `Successly processed request to delete product id: ${req.params.id}`,
+          status: dbProductData,
+        }
     });
     })
     .catch(err => {
