@@ -117,7 +117,6 @@ router.put('/:id', (req, res) => {
     //-- Assign Product Tags if relevant
     .then((productTags) => {
       
-      
       // get list of current tag_ids
       const productTagIds = productTags.map(({ tag_id }) => tag_id);
 
@@ -130,7 +129,6 @@ router.put('/:id', (req, res) => {
             tag_id,
           };
         });
-
       
       // figure out which ones to remove
       const productTagsToRemove = productTags
@@ -144,7 +142,16 @@ router.put('/:id', (req, res) => {
         ProductTag.bulkCreate(newProductTags),
       ]);
     })
-    .then((updatedProductTags) => res.status(200).json({ message: "Successly received message", resultCode: updatedProductTags[0]}))
+    .then((updatedProductTags) => res.status(200).json(
+      {
+        message: "Successly received message",
+        resultCode: updatedProductTags[0],
+        request: {
+          params: req.params, 
+          body: req.body
+        },
+      }
+    ))
     .catch( ( err ) => {
       console.log(err);
       res.status(400).json({
@@ -156,7 +163,6 @@ router.put('/:id', (req, res) => {
         error: err
       });
     });
-    
 });
 
 router.delete('/:id', (req, res) => {
