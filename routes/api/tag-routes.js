@@ -1,18 +1,32 @@
+/*
+   Purpose: API Gateway to the `/api/tags` endpoint, full CRUD.
+   Author(s): Erik Plachta, and Xander Rapstine
+   Date: 02/06/2022
+*/
+
+//------------------------------------------------------------------------------
+//-- IMPORTS
+
 const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
 
 //-- Used for getting products associated to tags
 const sequelize = require('../../config/connection');
 
-//-- The `/api/tags` endpoint
+//------------------------------------------------------------------------------
+//-- GET
+
+//-- The `/api/tags` endpoint used to get ALL tags & associated products.
 router.get('/', (req, res) => {
+  
   // find all tags
   Tag.findAll({
-    // be sure to include its associated Product data
+    //-- Include FULL product details
     include: [
       {
         model: Product,
-        as: "tag_id"
+        // attributes: [ "id", "product_name" ]
+        // as: "tag_id"
       }
     ]
   })
@@ -20,20 +34,16 @@ router.get('/', (req, res) => {
   .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
-//-- The `/api/tags/:id` endpoint
+//-- The `/api/tags/:id` endpoint used to get a specific tag by id #.
 router.get('/:id', (req, res) => {
+  
   // find a single tag by its `id`
   Tag.findOne({
     where: {
       id: req.params.id
     },
-    // Include its associated Product data
-    include: [
-      {
-        model: Product,
-        as: "tag_id"
-      }
-  ]
+    //- Include  associated products full details
+    include: [{model: Product}]
   })
   .then( tag => {
     if(!tag){
@@ -46,12 +56,44 @@ router.get('/:id', (req, res) => {
   .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
+//------------------------------------------------------------------------------
+//-- POST
+
+//-- The `/api/tags` endpoint used to creat3e a NEW tag.
 router.post('/', (req, res) => {
   // create a new tag
   
+  /* Payload Example:
+  
+    URL: http://127.0.0.1:3001/api/tags/
+
+    Body: as JSON
+      {
+        "tag_name": "Your Tag-Name here"
+      }
+    
+    RESPONSE:
+      {
+        "message": "Created new tag.",
+        "response": 
+          {
+            "id": 9,
+            "tag_name": "My New Tag"
+          }
+      }
+  */
+  
   //-- didn't receive tag_name as arg
   if(!req.body.tag_name){
-    res.status(404).json({ message: `Did not receive a valid request.` });
+    res.status(404).json({
+      request: {
+        method: req.method, 
+        body: req.body
+      },
+      response: {
+        message: `Invalid request.`
+      }
+    });
   }
   //-- Otherwise create it
   else {
@@ -59,7 +101,18 @@ router.post('/', (req, res) => {
       {
       'tag_name': req.body.tag_name,
     })
-      .then(dbTagData => res.status(200).json({message: `Created new tag.`,responseCode: dbTagData}))
+      .then(dbTagData => res.status(200).json({
+        // message: `Created new tag ${dbTagData.id} id: ${dbTagData.tag_name}.`,
+        request: {
+          method: req.method, 
+          body: req.body
+        },
+        response: {
+          status: 200,
+          message: `Created new tag ${dbTagData.id} id: ${dbTagData.tag_name}.`,
+          new: dbTagData,
+        }
+      }))
       .catch(err => {
         // console.log(err);
         res.status(500).json(err);
@@ -67,7 +120,36 @@ router.post('/', (req, res) => {
   }
 });
 
+//------------------------------------------------------------------------------
+//-- PUT
+
+//-- The `/api/tags/:id` endpoint used to update an existing `tag_name`
 router.put('/:id', (req, res) => {
+  //-- Update `tag_name` on already existing tag
+
+  /*Request Example
+    URL: http://127.0.0.1:3001/api/tags/1
+
+    Body: as JSON
+      {
+        "tag_name": "Your new tag-name here"
+      }
+    
+    Client Response:
+      {
+        "message": "Requset received.",
+        "request": {
+          "id": "9",
+          "body": {
+            "tag_name": "Reassigned"
+          }
+        },
+        "response": {
+          "success": 1
+        }
+      }
+  */
+
   // update a tag's name by its `id` value
   if(! req.body.tag_name ){
     res.status(404).json({ message: `Invalid request.`,request: req.body });
@@ -87,7 +169,18 @@ router.put('/:id', (req, res) => {
           res.status(404).json({ message: `No Tag found with this id ${req.params.id}` });
           return;
         }
-        res.status(200).json({message: "Requset received.",responesCode: dbTagData[0]});
+        res.status(200).json({
+          message: "Requset received.",
+          request: {
+            method: req.method,
+            // id: req.params.id,
+            params: req.params, 
+            body: req.body
+          },
+          response: {
+            success: dbTagData[0]
+          }
+        });
       })
       .catch(err => {
         console.log(err);
@@ -96,8 +189,18 @@ router.put('/:id', (req, res) => {
   }
 });
 
+//------------------------------------------------------------------------------
+//-- DELETE
+
+//-- The `/api/tags/:id` endpoint used to delete a tag. 
 router.delete('/:id', (req, res) => {
   // delete on tag by its `id` value
+
+  /* Request Example
+
+      URL: http://127.0.0.1:3001/api/tags/1
+  */
+
   Tag.destroy({
     where: {
       id: req.params.id
@@ -105,15 +208,43 @@ router.delete('/:id', (req, res) => {
   })
     .then(dbTagData => {
       if (!dbTagData) {
-        res.status(404).json({ message: `No tag found with this id: ${req.params.id}` });
+        res.status(404).json({
+          message: `No tag found with this id: ${req.params.id}`,
+          request: {
+            method: req.method, 
+            id: req.params.id
+          }
+        });
         return;
       }
-      res.status(200).json({message: `Successly deleted Tag: ${req.params.id}`,responseCode: `${dbTagData}`});
+      res.status(200).json({
+        message: `Successly deleted Tag: ${req.params.id}`,
+        request: {
+          method: req.method,
+          id: req.params.id
+        },
+        response: {
+          responseCode: `${dbTagData}`
+        }
+      });
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json(err);
+      res.status(500).json({
+        messege: "ERROR: Unable to complete client request.",
+        request: {
+          method: req.method,
+          id: req.params.id
+        },
+        response:{
+          error: err,
+        } 
+      });
     });
 });
+
+
+//------------------------------------------------------------------------------
+//-- EXPORTS
 
 module.exports = router;

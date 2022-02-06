@@ -1,8 +1,19 @@
+/*
+   Purpose: API Gateway to the `/api/tags` endpoint, full CRUD.
+   Author(s): Erik Plachta, and Xander Rapstine
+   Date: 02/06/2022
+*/
+
+//------------------------------------------------------------------------------
+//-- IMPORTS
+
 const router = require('express').Router();
 const { Category, Product } = require('../../models');
 
-// The `/api/categories` endpoint
+//------------------------------------------------------------------------------
+//-- GET
 
+// The `/api/categories` endpoint
 router.get('/', (req, res) => {
   // find all categories
   Category.findAll({
@@ -33,6 +44,9 @@ router.get('/:id', (req, res) => {
     .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
+//------------------------------------------------------------------------------
+//-- POST 
+
 router.post('/', (req, res) => {
   // create a new category
   //-- didn't receive category_name as arg
@@ -52,6 +66,9 @@ router.post('/', (req, res) => {
       });
   }
 });
+
+//------------------------------------------------------------------------------
+//-- PUT
 
 router.put('/:id', (req, res) => {
   // update a category by its `id` value
@@ -83,6 +100,9 @@ router.put('/:id', (req, res) => {
   }
 });
 
+//------------------------------------------------------------------------------
+//-- DELETE
+
 router.delete('/:id', (req, res) => {
   // delete a category by its `id` value
   Category.destroy({
@@ -102,5 +122,8 @@ router.delete('/:id', (req, res) => {
       res.status(500).json(err);
     });
 });
+
+//------------------------------------------------------------------------------
+//-- EXPORTS 
 
 module.exports = router;
