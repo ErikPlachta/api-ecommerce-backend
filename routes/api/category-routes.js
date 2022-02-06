@@ -35,7 +35,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   // create a new category
-  //-- didn't receive tag_name as arg
+  //-- didn't receive category_name as arg
   if(!req.body.category_name){
     res.status(404).json({ message: `Did not receive a valid request.`,request: req.body });
   }

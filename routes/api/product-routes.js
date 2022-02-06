@@ -36,6 +36,8 @@ router.get('/:id', (req, res) => {
     .catch(err => res.status(500).json(`ERROR: ${err}`))
 });
 
+
+
 // create new product
 router.post('/', (req, res) => {
   /* req.body should look like this...
@@ -61,9 +63,13 @@ router.post('/', (req, res) => {
         return ProductTag.bulkCreate(productTagIdArr);
       }
       // if no product tags, just respond
-      res.status(200).json(product);
+      res.status(200).json( {response: product} );
     })
-    .then((productTagIds) => res.status(200).json(productTagIds))
+    .then((productTagIds) => res.status(200).json( {
+      message: "success",
+      results: productTagIds
+      }
+    ))
     .catch((err) => {
       console.log(err);
       res.status(400).json(err);
@@ -82,7 +88,9 @@ router.put('/:id', (req, res) => {
       // find all associated tags from ProductTag
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
+    //-- Assign Product Tags if relevant
     .then((productTags) => {
+      
       // get list of current tag_ids
       const productTagIds = productTags.map(({ tag_id }) => tag_id);
       
@@ -112,17 +120,45 @@ router.put('/:id', (req, res) => {
         ProductTag.destroy({ where: { id: productTagsToRemove } }),
         ProductTag.bulkCreate(newProductTags),
       ]);
+      
     })
     .then((updatedProductTags) => res.status(200).json(updatedProductTags))
-    .catch((err) => {
+    .catch( ( err ) => {
       // console.log(err);
-      res.status(400).json({"error": err});
+      res.status(400).json({
+        message: "404 - Bad Request",
+        request: {
+          params: req.params, 
+          body: req.body
+        },
+        error: err
+      });
     });
     
 });
 
 router.delete('/:id', (req, res) => {
   // delete one product by its `id` value
+  
+  Product.destroy({
+    where: {
+      id: req.params.id
+    }
+  })
+    .then(dbProductData => {
+      if (!dbProductData) {
+        res.status(404).json({ message: `No tag found with this id: ${req.params.id}` });
+        return;
+      }
+      res.status(200).json({
+        message: `Successly deleted Product: ${req.params.id}`,
+        responseCode: `${dbProductData}`
+    });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 module.exports = router;
