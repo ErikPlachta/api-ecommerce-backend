@@ -61,9 +61,9 @@ electronics industry, having generated an estimated US$29 trillion in 2017
 
 ### Dev Dependencies
 
-- [nodemon](https://www.npmjs.com/package/nodemon) nodemon is a tool that helps
+- [nodemon](https://www.npmjs.com/package/nodemon) "*is a tool that helps
 develop node.js based applications by automatically restarting the node
-application when file changes in the directory are detected.
+application when file changes in the directory are detected.*"
 > Just type `npm run watch` in the command line to start
 
 ---
