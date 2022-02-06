@@ -94,7 +94,7 @@ router.post('/', (req, res) => {
       
       //-- Assigning database response to var
       dbProductData = product;
-      console.log(product)
+      // console.log(product)
 
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
       if (req.body.tagIds) {
@@ -132,6 +132,8 @@ router.post('/', (req, res) => {
 //------------------------------------------------------------------------------
 //-- PUT
 
+
+
 //-- The `/api/products/:id` endpoint used make a change to an existing product field
 router.put('/:id', (req, res) => {
   //-- Update an existing product field
@@ -141,68 +143,57 @@ router.put('/:id', (req, res) => {
 
   // update product data
   Product.update(req.body, {
-    // product_name: req.body.product_name,
-    // price: req.body.price,
-    // stock: req.body.stock,
-    // category_id: req.body.category_id,
     where: {
         id: req.params.id,
     },
   })
-  // find all associated tags from ProductTag
+  // Return all tags associated to product_id
     .then((product) => {
       dbProductData = product;
-      
+      // find all associated tags from ProductTag
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
   //-- Assign Product Tags if relevant
     .then((productTags) => {  
       
-      // get list of current tag_ids
-      const productTagIds = productTags.map(({ tag_id }) => tag_id);
-      
-      
-      //-- If body included tagIds, evaluate and update them on item
+      //-- if tags are being sent in to update
       if(req.body.tagIds){
-        
-      //-- Try to review and update tags
-        try {
-          // create filtered list of new tag_ids
-          const newProductTags = req.body.tagIds
-            .filter((tag_id) => {!productTagIds.includes(tag_id)})
-            .map((tag_id) => {
-              return {
-                product_id: req.params.id,
-                tag_id,
-              };
-            });
+        // get list of current tag_ids
+        const productTagIds = productTags.map(({ tag_id }) => tag_id);
+        // create filtered list of new tag_ids
+        const newProductTags = req.body.tagIds
+          .filter((tag_id) => !productTagIds.includes(tag_id))
+          .map((tag_id) => {
+            return {
+              product_id: req.params.id,
+              tag_id,
+            };
+          });
 
-          // Which tags to remove - (recived `productTags` as then arg)
-          const productTagsToRemove = productTags
-            .filter(({ tag_id }) =>     !req.body.tagIds.includes(tag_id) )
-            .map(({ id }) => id);
+        // Which tags to remove - (recived `productTags` as then arg)
+        const productTagsToRemove = productTags
+          .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id) )
+          .map(({ id }) => id);
           
-          // run both actions, then return results
-          return Promise.all([
-            "Reviewed and updated tags if approriate",
-            ProductTag.destroy({ where: { id: productTagsToRemove } }),
-            ProductTag.bulkCreate(newProductTags),
-          ])
-        }
-      
-      //-- if can't update tags, response matches
-        catch (err) {
-          console.log(`//-- Catch Error: ${err}`)
-          return err;
-        }
+        // run both actions, then return results
+        return Promise.all([
+          //-- confirming was successful
+          1,
+          //-- remove tags from product_tag table
+          ProductTag.destroy({ where: { id: productTagsToRemove } }),
+          //-- readd tags based on provided 
+          ProductTag.bulkCreate(newProductTags),
+          
+          // {"tagsOld": ProductTag.destroy({ where: { id: productTagsToRemove } }) },
+          // {"tagsNew": ProductTag.bulkCreate(newProductTags) },
+        ]);
       }
-    //-- otherwise no tags so don't try
       else {
-        // console.log("//-- Else no tags")
-        return "No tagIds to update";
+        //-- confirming was successful
+        return [1];
       }
     })
-
+      
   //-- Respond to client with success with details
     .then((results) => res.status(200).json(
       {
@@ -216,14 +207,14 @@ router.put('/:id', (req, res) => {
           status: 200,
           message: "Received and procssed request.",
           success: dbProductData[0],
-          apiResponse: results
+          apiResponse: results[0]
         }
       }
     ))
 
   //-- Respond to client if error with details
     .catch( ( err ) => {
-      console.log(err);
+      // console.log(err);
       res.status(400).json({
         request: {
           params: req.params, 
