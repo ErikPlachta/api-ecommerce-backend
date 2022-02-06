@@ -1,6 +1,6 @@
 # API E-Commerce Back End API
 
-## This Concept APP demonstrates how you can use an ORM to communicate between an Express.js server and MySQL Database.
+## This Concept APP demonstrates how you can use an ORM to communicate between an Express.js server and MySQL Database
 
 ---
 
@@ -26,8 +26,6 @@ electronics industry, having generated an estimated US$29 trillion in 2017
 > E-commerce platforms like Shopify and WooCommerce provide a suite of services
 > to businesses of all sizes. Due to the prevalence of these platforms,
 > developers should understand the fundamental architecture of e-commerce sites.
-
-
 
 ---
 
@@ -61,10 +59,12 @@ electronics industry, having generated an estimated US$29 trillion in 2017
 - [dotenv](https://www.npmjs.com/package/dotenv) is used to give access to the `.env` file, which contains environment
  variables that store sensitive data, like your MySQL username, password, and database name.
 
-
 ### Dev Dependencies
 
-- [nodemon] is used for...
+- [nodemon](https://www.npmjs.com/package/nodemon) nodemon is a tool that helps
+develop node.js based applications by automatically restarting the node
+application when file changes in the directory are detected.
+> Just type `npm run watch` in the command line to start
 
 ---
 
