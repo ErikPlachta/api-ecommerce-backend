@@ -1,0 +1,27 @@
+1. Review package.json
+2. npm i
+3. Update RENAME.env
+4. MySQL -u root -p < db/schema.sql
+5. npm run seed
+6. npm start
+7. Demonstrate API calling with Insomnia
+   1. GET ALL 
+        1. categories
+        2. products
+        3. tags
+   2. GET /:id
+        1. categories
+        2. products
+        3. tags
+   3. POST 
+        1. categories
+        2. products
+        3. tags
+   4. PUT /:id
+        1. categories 
+        2. products
+        3. tags
+   5. DELETE /:id
+        1. categories 
+        2. products
+        3. tags

@@ -138,7 +138,7 @@ router.put('/:id', (req, res) => {
     
     Client Response:
       {
-        "message": "Requset received.",
+        "message": "Request received.",
         "request": {
           "id": "9",
           "body": {
@@ -171,7 +171,7 @@ router.put('/:id', (req, res) => {
           return;
         }
         res.status(200).json({
-          message: "Requset received.",
+          message: "Request received.",
           request: {
             method: req.method,
             // id: req.params.id,
